@@ -29,13 +29,39 @@ model = ... # your model
 quality_dict = measure_quality(model)
 ```
 
-Supported Metrics:
+Here is an example output (pretrained ResNet-18 on ImageNet):
 
-### Sparsity
+```python
+{'layer1.0.conv1': {'sparsity': 0.125244140625,
+                    'variance_entropy': 0.8243831176467854},
+ 'layer1.0.conv2': {'sparsity': 0.0, 'variance_entropy': 0.8540944028708247},
+ 'layer1.1.conv1': {'sparsity': 0.0, 'variance_entropy': 0.880116579714338},
+ 'layer1.1.conv2': {'sparsity': 0.0, 'variance_entropy': 0.8770092802517852},
+ 'layer2.0.conv1': {'sparsity': 0.0, 'variance_entropy': 0.9162120601419921},
+ 'layer2.0.conv2': {'sparsity': 0.0, 'variance_entropy': 0.79917093039702},
+ 'layer2.1.conv1': {'sparsity': 0.0, 'variance_entropy': 0.8988180721697099},
+ 'layer2.1.conv2': {'sparsity': 0.0, 'variance_entropy': 0.8584897149301801},
+ 'layer3.0.conv1': {'sparsity': 0.0, 'variance_entropy': 0.589569852560285},
+ 'layer3.0.conv2': {'sparsity': 0.0, 'variance_entropy': 0.7655632562758724},
+ 'layer3.1.conv1': {'sparsity': 0.0, 'variance_entropy': 0.8485658915907506},
+ 'layer3.1.conv2': {'sparsity': 1.52587890625e-05,
+                    'variance_entropy': 0.7960795856993427},
+ 'layer4.0.conv1': {'sparsity': 7.62939453125e-06,
+                    'variance_entropy': 0.6701797219658017},
+ 'layer4.0.conv2': {'sparsity': 7.62939453125e-06,
+                    'variance_entropy': 0.8185696588740375},
+ 'layer4.1.conv1': {'sparsity': 0.0, 'variance_entropy': 0.6583874160290571},
+ 'layer4.1.conv2': {'sparsity': 0.001796722412109375,
+                    'variance_entropy': 0.21928562164990348}}
+```
+
+### Supported Metrics
+
+#### Sparsity
 
 *Sparsity* measures the ratio of 2D Filters with a $l_\infty$-norm that is lower than 1% of the highest norm in that layer. These filters will most likely not contribute to your learned function beyond noise. You should minimize this value if you are interested in exploiting all of your available model capacity. On the other hand, larger sparsity values allow you to successfully prune many weights.
 
-### Variance Entropy
+#### Variance Entropy
 
 *Variance Entropy*  captures the difference in filter patterns in your conv layer. We have observed that significantly overparameterized networks learn many redundand filters in deeper layers. Hence we assume that, generally, you'd like to increase diversity. A good value is somewhere around 0.9 - this means that the layer in question has learned a filter distribution that is signifincantly different from random. A value close to 0 indicates highly redudand filters. A value over 1 indicates a random distribution that you'd find prior to any training (i.e. right after initialization) or in GAN-Discriminator at the end of training (when it can no longer distinguish between real and fake inputs).
 
