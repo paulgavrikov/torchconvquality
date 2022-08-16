@@ -34,7 +34,7 @@ def measure_quality(model, sparsity_eps=0.01):
         
         norms = np.linalg.norm(w, axis=0)
         
-        w = w[norms < sparsity_eps * norms.max()]
+        w = w[norms >= sparsity_eps * norms.max()]
         
         s = np.linalg.svd(w - w.mean(axis=0), full_matrices=False, compute_uv=False)
         v = s ** 2 / (n - 1)
