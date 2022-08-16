@@ -22,6 +22,7 @@ def measure_quality(model, sparsity_eps=0.01):
         v = s ** 2 / (n - 1)
         entropy = scipy.stats.entropy(v, base=10) / _entropy_max_threshold(n)
 
+        info_dict[name]["n"] = n
         info_dict[name]["variance_entropy"] = entropy
 
         t = np.abs(w).max() * sparsity_eps
@@ -30,5 +31,14 @@ def measure_quality(model, sparsity_eps=0.01):
         sparsity = (new_layer.sum(axis=1) == 0).sum() / n
 
         info_dict[name]["sparsity"] = sparsity
+        
+        norms = np.linalg.norm(w, axis=0)
+        
+        w = w[norms < sparsity_eps * norms.max()]
+        
+        s = np.linalg.svd(w - w.mean(axis=0), full_matrices=False, compute_uv=False)
+        v = s ** 2 / (n - 1)
+        entropy = scipy.stats.entropy(v, base=10) / _entropy_max_threshold(n)
+        info_dict[name]["variance_entropy_clean"] = entropy
 
     return info_dict
