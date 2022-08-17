@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="torchconvquality",
-    version="0.1.0",
+    version="0.1.1",
     author="Paul Gavrikov",
     author_email="paul.gavrikov@hs-offenburg.de",
     description="A library for PyTorch model convolution quality analysis.",
