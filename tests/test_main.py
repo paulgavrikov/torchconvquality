@@ -1,5 +1,13 @@
-import torchvision
-from torchconvquality import measure_quality
+import torchvision.models
+from torchconvquality import measure_quality, torch_entropy10
+import scipy.stats
+import torch
+
+
+def test_torch_entropy10():
+    p = torch.tensor([0.5,0.2,0.2,0.1])
+    assert torch_entropy10(p) == scipy.stats.entropy(p.detach().numpy(), base=10)
+    assert torch_entropy10(p) != scipy.stats.entropy(p.detach().numpy(), base=2)
 
 
 def test_pretrained():
@@ -32,6 +40,8 @@ def test_untrained():
     quality_dict = measure_quality(model)
 
     assert quality_dict is not None
+    from pprint import pprint
+    pprint(quality_dict)
 
     for layer_name, entry in quality_dict.items():
         assert "sparsity" in entry

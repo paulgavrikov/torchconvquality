@@ -1,6 +1,12 @@
 import torch
 import numpy as np
-import scipy.stats
+
+
+def torch_entropy10(probs):
+    e = 0
+    for p in probs:
+        e += p * torch.log10(p)
+    return -e
 
 
 def _entropy_max_threshold(n):
@@ -8,30 +14,32 @@ def _entropy_max_threshold(n):
     return l / (1 + np.exp(-k * (np.log2(n) - x0))) + b
 
 
-def svd_variance(x):
-    s = np.linalg.svd(x - x.mean(axis=0), full_matrices=False, compute_uv=False)
+def svd_variance_ratio(x):
+    print(x.shape)
+    s = torch.linalg.svdvals(x - x.mean(axis=0))
+    print(s)
     variance = s ** 2 / (len(x) - 1)
-    return variance
+    return variance / variance.sum()
 
 
 def measure_layer_quality(conv_layer, sparsity_eps):
     info_dict = {}
-    w = conv_layer.weight.detach().cpu().numpy().reshape(-1, conv_layer.kernel_size[0] * conv_layer.kernel_size[1])
+    w = conv_layer.weight.view(-1, conv_layer.kernel_size[0] * conv_layer.kernel_size[1])
     n = w.shape[0]
     info_dict["n"] = n
 
-    t = np.abs(w).max() * sparsity_eps
-    new_layer = np.ones_like(w)
-    new_layer[np.abs(w) < t] = 0
+    t = abs(w).max() * sparsity_eps
+    new_layer = torch.ones_like(w)
+    new_layer[abs(w) < t] = 0
     sparsity = (new_layer.sum(axis=1) == 0).sum() / n
-    info_dict["sparsity"] = sparsity
+    info_dict["sparsity"] = sparsity.item()
 
-    entropy = scipy.stats.entropy(svd_variance(w), base=10) / _entropy_max_threshold(n)
-    info_dict["variance_entropy"] = entropy
+    entropy = torch_entropy10(svd_variance_ratio(w)) / _entropy_max_threshold(n)
+    info_dict["variance_entropy"] = entropy.item()
 
     w_clean = w[new_layer.sum(axis=1) > 0]
-    entropy_clean = scipy.stats.entropy(svd_variance(w_clean), base=10) / _entropy_max_threshold(len(w_clean))
-    info_dict["variance_entropy_clean"] = entropy_clean
+    entropy_clean = torch_entropy10(svd_variance_ratio(w_clean)) / _entropy_max_threshold(len(w_clean))
+    info_dict["variance_entropy_clean"] = entropy_clean.item()
     return info_dict
 
 
