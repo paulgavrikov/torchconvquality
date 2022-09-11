@@ -1,22 +1,21 @@
 import torchvision.models
-from torchconvquality import measure_quality, torch_entropy10
+from torchconvquality import measure_quality, _torch_entropy10
 import scipy.stats
 import torch
 
 
 def test_torch_entropy10():
-    p = torch.tensor([0.5,0.2,0.2,0.1])
-    assert torch_entropy10(p) == scipy.stats.entropy(p.detach().numpy(), base=10)
-    assert torch_entropy10(p) != scipy.stats.entropy(p.detach().numpy(), base=2)
+    p = torch.tensor([0.5, 0.2, 0.2, 0.1])
+    assert _torch_entropy10(p) == scipy.stats.entropy(p.detach().numpy(), base=10)
+    assert _torch_entropy10(p) != scipy.stats.entropy(p.detach().numpy(), base=2)
 
 
 def test_pretrained():
     model = torchvision.models.resnet18(True)
-    quality_dict = measure_quality(model)
+    if torch.cuda.is_available():
+        model.cuda()
 
-    from pprint import pprint
-    pprint(quality_dict)
-
+    quality_dict = measure_quality(model, sparsity_eps=0.1)
     assert quality_dict is not None
 
     for layer_name, entry in quality_dict.items():
@@ -37,11 +36,11 @@ def test_pretrained():
 
 def test_untrained():
     model = torchvision.models.resnet18(False)
+    if torch.cuda.is_available():
+        model.cuda()
+    
     quality_dict = measure_quality(model)
-
     assert quality_dict is not None
-    from pprint import pprint
-    pprint(quality_dict)
 
     for layer_name, entry in quality_dict.items():
         assert "sparsity" in entry
