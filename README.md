@@ -65,11 +65,15 @@ Here is an example output (pretrained ResNet-18 on ImageNet):
 
 #### Sparsity
 
-*Sparsity* measures the ratio of 2D Filters with a $l_\infty$-norm that is lower than 1% of the highest norm in that layer. These filters will most likely not contribute to your learned function beyond noise. You should minimize this value if you are interested in exploiting all of your available model capacity. On the other hand, larger sparsity values allow you to successfully prune many weights.
+*Sparsity* measures the ratio of 2D Filters with a $l_\infty$-norm that is lower than `sparsity_eps` (default: 1%) of the highest norm in that layer. These filters will most likely not contribute to your learned function beyond noise. You should minimize this value if you are interested in exploiting all of your available model capacity. On the other hand, larger sparsity values allow you to successfully prune many weights.
 
 #### Variance Entropy
 
-*Variance Entropy*  captures the difference in filter patterns in your conv layer. We have observed that significantly overparameterized networks learn many redundand filters in deeper layers. Hence we assume that, generally, you'd like to increase diversity. A good value is somewhere around 0.9 - this means that the layer in question has learned a filter distribution that is signifincantly different from random. A value close to 0 indicates highly redudand filters. A value over 1 indicates a random distribution that you'd find prior to any training (i.e. right after initialization) or in GAN-Discriminator at the end of training (when it can no longer distinguish between real and fake inputs).
+*Variance Entropy* captures the difference in filter patterns in your conv layer. We have observed that significantly overparameterized networks learn many redundand filters in deeper layers. Hence we assume that, generally, you'd like to increase diversity. A good value is somewhere around 0.9 - this means that the layer in question has learned a filter distribution that is signifincantly different from random. A value close to 0 indicates highly redudand filters. A value over 1 indicates a random distribution that you'd find prior to any training (i.e. right after initialization) or in GAN-Discriminator at the end of training (when it can no longer distinguish between real and fake inputs).
+
+#### Variance Entropy Clean
+
+*Variance Entropy Clean* is just *Variance Entropy* applied on pruned layer weights (as defined by `sparsity_eps`).
 
 ## Citation
 
