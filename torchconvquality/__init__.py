@@ -17,7 +17,6 @@ def _entropy_max_threshold(n):
 def _svd_variance_ratio(x):
     print(x.shape)
     s = torch.linalg.svdvals(x - x.mean(axis=0))
-    print(s)
     variance = s ** 2 / (len(x) - 1)
     return variance / variance.sum()
 
