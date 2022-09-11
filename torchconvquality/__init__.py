@@ -39,16 +39,22 @@ def variance_entropy(w, **kwargs):
     return entropy.item()
 
 
-def measure_layer_quality(conv_layer, **kwargs):
+def measure_conv_weight_quality(w, **kwargs):
     info_dict = {}
-    w = conv_layer.weight.view(-1, conv_layer.kernel_size[0] * conv_layer.kernel_size[1])
     n = w.shape[0]
-    info_dict["n"] = n
-
     sparsity_ratio, sparse_mask = sparsity(w, **kwargs)
+
+    info_dict["n"] = n
     info_dict["sparsity"] = sparsity_ratio
     info_dict["variance_entropy"] = variance_entropy(w, **kwargs)
     info_dict["variance_entropy_clean"] = variance_entropy(w[~sparse_mask], **kwargs)
+
+    return info_dict
+
+
+def measure_layer_quality(conv_layer, **kwargs):
+    w = conv_layer.weight.view(-1, conv_layer.kernel_size[0] * conv_layer.kernel_size[1])
+    info_dict = measure_conv_weight_quality(w, **kwargs)
     return info_dict
 
 
