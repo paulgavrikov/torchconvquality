@@ -1,6 +1,7 @@
 # torchconvquality
 
 [![Latest Version](https://img.shields.io/pypi/v/torchconvquality.svg?color=green)](https://pypi.python.org/pypi/torchconvquality)
+[![pytest](https://github.com/paulgavrikov/torchconvquality/actions/workflows/pytest.yml/badge.svg)](https://github.com/paulgavrikov/torchconvquality/actions/workflows/pytest.yml)
 [![CC BY-SA 4.0][cc-by-sa-shield]][cc-by-sa]
 
 
