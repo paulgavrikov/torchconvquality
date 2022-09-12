@@ -30,6 +30,8 @@ def test_orthogonality():
     assert orthogonality(w) < ERROR
     assert orthogonality(w_b) < ERROR
     assert abs(orthogonality(w) - orthogonality(w_b)) < ERROR
+    w = torch.zeros(64, 16, 3, 3)
+    assert orthogonality(w) < ERROR
 
 
 def test_torch_entropy10():
