@@ -1,17 +1,45 @@
 import torchvision.models
-from torchconvquality import measure_quality, _torch_entropy10
+from torchconvquality import measure_quality, _torch_entropy10, sparsity, variance_entropy, orthogonality
 import scipy.stats
 import torch
 
 
+ERROR = 1e-5
+
+
+def test_sparsity():
+    w = torch.zeros(64, 16, 3, 3)
+    assert sparsity(w)[0] == 1
+    w = torch.ones(64, 16, 3, 3)
+    assert sparsity(w)[0] == 0
+    w = torch.ones(2, 1, 3, 3)
+    w[0] = w[0] * 0
+    assert sparsity(w)[0] == 0.5
+
+
+def test_variance_entropy():
+    w = torch.rand(128, 128, 3, 3)
+    assert variance_entropy(w) > 1
+    w = torch.ones(64, 16, 3, 3)
+    assert variance_entropy(w) == 0
+
+
+def test_orthogonality():
+    w = torch.ones(64, 16, 3, 3)
+    w_b = torch.ones(64, 16, 3, 3) * 0.1
+    assert orthogonality(w) < ERROR
+    assert orthogonality(w_b) < ERROR
+    assert abs(orthogonality(w) - orthogonality(w_b)) < ERROR
+
+
 def test_torch_entropy10():
     p = torch.tensor([0.5, 0.2, 0.2, 0.1])
-    assert _torch_entropy10(p) == scipy.stats.entropy(p.detach().numpy(), base=10)
+    assert abs(_torch_entropy10(p) - scipy.stats.entropy(p.detach().numpy(), base=10)) < ERROR
     assert _torch_entropy10(p) != scipy.stats.entropy(p.detach().numpy(), base=2)
 
 
 def test_pretrained():
-    model = torchvision.models.resnet18(True)
+    model = torchvision.models.resnext50_32x4d(True)
     if torch.cuda.is_available():
         model.cuda()
 
@@ -35,10 +63,10 @@ def test_pretrained():
 
 
 def test_untrained():
-    model = torchvision.models.resnet18(False)
+    model = torchvision.models.resnext50_32x4d(False)
     if torch.cuda.is_available():
         model.cuda()
-    
+
     quality_dict = measure_quality(model)
     assert quality_dict is not None
 
@@ -53,3 +81,26 @@ def test_untrained():
         assert entry["sparsity"] <= 0.1
         assert entry["variance_entropy"] >= 0.9
         assert entry["variance_entropy_clean"] >= 0.9
+
+
+def test_untouched_original():
+    model = torchvision.models.resnext50_32x4d(False)
+    state_pre = model.state_dict().copy()
+    _ = measure_quality(model)
+    state_post = model.state_dict()
+
+    for k_pre, k_post in zip(state_pre.keys(), state_post.keys()):
+        assert torch.equal(state_pre[k_pre], state_post[k_post])
+
+
+def test_output_no_tensors():
+    model = torchvision.models.resnext50_32x4d(False)
+    if torch.cuda.is_available():
+        model.cuda()
+
+    quality_dict = measure_quality(model)
+    assert quality_dict is not None
+
+    for layer_name, entry in quality_dict.items():
+        for key, value in entry.items():
+            assert type(value) != torch.Tensor
