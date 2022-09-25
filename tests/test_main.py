@@ -19,9 +19,10 @@ def test_sparsity():
 
 def test_variance_entropy():
     w = torch.rand(128, 128, 3, 3)
-    assert variance_entropy(w) > 1
+    ve, ve_norm = variance_entropy(w) 
+    assert ve_norm > 1
     w = torch.ones(64, 16, 3, 3)
-    assert variance_entropy(w) == 0
+    assert variance_entropy(w) == (0, 0)
 
 
 def test_orthogonality():
@@ -50,15 +51,22 @@ def test_pretrained():
 
     for layer_name, entry in quality_dict.items():
         assert "sparsity" in entry
+        assert "orthogonality" in entry
         assert "variance_entropy" in entry
+        assert "variance_entropy_norm" in entry
         assert "variance_entropy_clean" in entry
+        assert "variance_entropy_clean_norm" in entry
         assert "n" in entry
         assert entry["sparsity"] <= 1
         assert entry["sparsity"] >= 0
         assert entry["variance_entropy"] >= 0
         assert entry["variance_entropy"] <= 1
+        assert entry["variance_entropy_norm"] >= 0
+        assert entry["variance_entropy_norm"] <= 1
         assert entry["variance_entropy_clean"] >= 0
         assert entry["variance_entropy_clean"] <= 1
+        assert entry["variance_entropy_clean_norm"] >= 0
+        assert entry["variance_entropy_clean_norm"] <= 1
 
         if entry["sparsity"] == 0:
             assert entry["variance_entropy"] == entry["variance_entropy_clean"]
@@ -74,8 +82,11 @@ def test_untrained():
 
     for layer_name, entry in quality_dict.items():
         assert "sparsity" in entry
+        assert "orthogonality" in entry
         assert "variance_entropy" in entry
+        assert "variance_entropy_norm" in entry
         assert "variance_entropy_clean" in entry
+        assert "variance_entropy_clean_norm" in entry
         assert "n" in entry
         assert entry["sparsity"] >= 0
 
@@ -83,6 +94,8 @@ def test_untrained():
         assert entry["sparsity"] <= 0.1
         assert entry["variance_entropy"] >= 0.9
         assert entry["variance_entropy_clean"] >= 0.9
+        assert entry["variance_entropy_norm"] >= 0.9
+        assert entry["variance_entropy_clean_norm"] >= 0.9
 
 
 def test_untouched_original():
