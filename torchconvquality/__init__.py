@@ -86,15 +86,15 @@ def measure_conv_weight_quality(w: torch.Tensor, **kwargs) -> dict:
 
     with torch.no_grad():
         sparsity_ratio, sparse_mask = sparsity(w, **kwargs)
-        variance_entropy, variance_entropy_norm = variance_entropy(w, **kwargs)
-        variance_entropy_clean, variance_entropy_clean_norm = variance_entropy(w, mask=~sparse_mask, **kwargs)
+        ve, ve_norm = variance_entropy(w, **kwargs)
+        ve_clean, ve_clean_norm = variance_entropy(w, mask=~sparse_mask, **kwargs)
 
         info_dict["n"] = n
         info_dict["sparsity"] = sparsity_ratio
-        info_dict["variance_entropy"] = variance_entropy
-        info_dict["variance_entropy_norm"] = variance_entropy_norm
-        info_dict["variance_entropy_clean"] = variance_entropy_clean
-        info_dict["variance_entropy_clean_norm"] = variance_entropy_clean_norm
+        info_dict["variance_entropy"] = ve
+        info_dict["variance_entropy_norm"] = ve_norm
+        info_dict["variance_entropy_clean"] = ve_clean
+        info_dict["variance_entropy_clean_norm"] = ve_clean_norm
         info_dict["orthogonality"] = orthogonality(w, **kwargs)
 
     return info_dict
