@@ -1,3 +1,4 @@
+from distutils.command.clean import clean
 import torch
 import numpy as np
 from typing import Tuple, Union
@@ -55,8 +56,8 @@ def variance_entropy(w: torch.Tensor, mask: Union[torch.Tensor, None] = None, **
     ratio = _svd_variance_ratio(w)
     entropy = 0.0
     if ratio.sum() != 0:
-        entropy = _torch_entropy10(ratio) / _entropy_max_threshold(n)
-    return entropy
+        entropy = _torch_entropy10(ratio)
+    return entropy, entropy /_entropy_max_threshold(n)
 
 
 def orthogonality(w: torch.Tensor, **kwargs) -> float:
@@ -85,11 +86,16 @@ def measure_conv_weight_quality(w: torch.Tensor, **kwargs) -> dict:
 
     with torch.no_grad():
         sparsity_ratio, sparse_mask = sparsity(w, **kwargs)
+        variance_entropy, variance_entropy_norm = variance_entropy(w, **kwargs)
+        variance_entropy_clean, variance_entropy_clean_norm = variance_entropy(w, mask=~sparse_mask, **kwargs)
 
         info_dict["n"] = n
         info_dict["sparsity"] = sparsity_ratio
-        info_dict["variance_entropy"] = variance_entropy(w, **kwargs)
-        info_dict["variance_entropy_clean"] = variance_entropy(w, mask=~sparse_mask, **kwargs)
+        info_dict["variance_entropy"] = variance_entropy
+        info_dict["variance_entropy_norm"] = variance_entropy_norm
+        info_dict["variance_entropy_clean"] = variance_entropy_clean
+        info_dict["variance_entropy_clean_norm"] = variance_entropy_clean_norm
+        info_dict["orthogonality"] = orthogonality(w, **kwargs)
 
     return info_dict
 
