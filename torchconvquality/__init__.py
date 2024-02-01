@@ -74,6 +74,16 @@ def orthogonality(w: torch.Tensor, **kwargs) -> float:
     c = abs(torch.matmul(w_norm, w_norm.T) - torch.eye(n)).sum() / (n * (n - 1))
     return (1 - c).item()
 
+def norm(w: torch.Tensor, ord=2, norm=True, **kwargs) -> float:
+
+    if norm:
+        w = w.flatten()
+        w = w - w.mean()
+        w = w / w.std()
+
+    return torch.linalg.norm(w, ord=ord).item()
+
+
 
 def measure_conv_weight_quality(w: torch.Tensor, **kwargs) -> dict:
 
@@ -96,6 +106,9 @@ def measure_conv_weight_quality(w: torch.Tensor, **kwargs) -> dict:
         info_dict["variance_entropy_clean"] = ve_clean
         info_dict["variance_entropy_clean_norm"] = ve_clean_norm
         info_dict["orthogonality"] = orthogonality(w, **kwargs)
+        info_dict["norm_l2"] = norm(w, ord=2, norm=True, **kwargs)
+        info_dict["norm_l1"] = norm(w, ord=1, norm=True, **kwargs)
+        
 
     return info_dict
 
