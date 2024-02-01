@@ -106,9 +106,10 @@ def measure_conv_weight_quality(w: torch.Tensor, **kwargs) -> dict:
         info_dict["variance_entropy_clean"] = ve_clean
         info_dict["variance_entropy_clean_norm"] = ve_clean_norm
         info_dict["orthogonality"] = orthogonality(w, **kwargs)
-        info_dict["norm_l2"] = norm(w, ord=2, norm=True, **kwargs)
-        info_dict["norm_l1"] = norm(w, ord=1, norm=True, **kwargs)
-        
+        info_dict["norm_l2_norm"] = norm(w, ord=2, norm=True, **kwargs)
+        info_dict["norm_l1_norm"] = norm(w, ord=1, norm=True, **kwargs)
+        info_dict["norm_l2"] = norm(w, ord=2, norm=False, **kwargs)
+        info_dict["norm_l1"] = norm(w, ord=1, norm=False, **kwargs)
 
     return info_dict
 
